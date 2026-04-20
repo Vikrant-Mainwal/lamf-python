@@ -25,7 +25,26 @@ def _handle_greeting(msg, portfolio, history):
 
 
 def _handle_loan_query(msg, portfolio, history):
-    return format_loan_query(portfolio)
+    """
+    If user wants numbers/eligibility → show formatted summary.
+    If user wants to understand HOW loans work → use LLM to explain naturally.
+    """
+    PROCESS_SIGNALS = [
+        "process", "how", "steps", "procedure", "kaise", "kya hai",
+        "what is", "explain", "tell me", "samjhao", "bata", "work",
+        "apply", "get loan", "start", "begin", "karna hai"
+    ]
+
+    msg_lower = msg.lower()
+    wants_explanation = any(sig in msg_lower for sig in PROCESS_SIGNALS)
+
+    if wants_explanation:
+        # User wants to understand the process → LLM explains naturally
+        llm_text = call_llm(msg, portfolio, history, intent="loan_process")
+        return format_llm(llm_text, portfolio, "loan_process")
+    else:
+        # User wants their numbers (how much, am I eligible, etc.)
+        return format_loan_query(portfolio)
 
 
 def _handle_fund_query(msg, portfolio, history):
@@ -72,10 +91,20 @@ def _handle_risk_query(msg, portfolio, history):
 
 
 def _handle_off_topic(msg, portfolio, history):
-    return format_off_topic()
+    """
+    Before hard-refusing, let LLM judge relevance.
+    Only truly unrelated queries get the refusal message.
+    """
+    llm_text = call_llm(msg, portfolio, history, intent="unknown")
+    
+    # If LLM itself says it can't help, return the standard message
+    # Otherwise trust the LLM's answer
+    refusal_signals = ["not related", "can't help with that", "outside my scope"]
+    if any(sig in llm_text.lower() for sig in refusal_signals):
+        return format_off_topic()
+    
+    return format_llm(llm_text, portfolio, "off_topic_recovered")
 
-
-# Dispatch table (replaces if-else chain) 
 
 HANDLERS = {
     Intent.GREETING   : _handle_greeting,

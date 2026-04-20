@@ -5,6 +5,12 @@ from cas_parser import parse_cas_pdf
 from ltv_engine import calculate_eligible_loan
 from chat_engine import get_chat_response
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+key = os.getenv("GROQ_API_KEY")
 
 
 app = FastAPI(title="LAMF Python Service", version="1.0.0")
@@ -90,6 +96,7 @@ async def analyze_cas(file: UploadFile = File(...)):
 # Chatbot
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
+    
     if not req.portfolio.get("investor"):
         raise HTTPException(status_code=400, detail="Portfolio data missing investor field")
  
@@ -100,6 +107,11 @@ async def chat(req: ChatRequest):
         portfolio=req.portfolio,
         history=history_dicts,
     )
+
+    # Print in console
+    # print("\n===== FINAL ASSISTANT RESPONSE =====")
+    # print(reply)
+    # print("===================================\n")
  
     return ChatResponse(reply=reply)
 

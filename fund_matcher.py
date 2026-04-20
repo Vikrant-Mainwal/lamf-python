@@ -9,9 +9,11 @@ STOP_WORDS = {
 
 # Known short aliases that users type (Hinglish / casual)
 ALIASES: dict[str, str] = {
-    "mirae":   "mirae asset",
-    "parag":   "parag parikh",
-    "ppfas":   "parag parikh",
+    "mirae": "mirae asset",
+    "mirae large": "mirae asset large cap",
+    "parag": "parag parikh",
+    "parag flexi": "parag parikh flexi cap",
+    "axis blue": "axis bluechip",
     "axis mf": "axis",
     "sbi mf":  "sbi",
     "hdfc mf": "hdfc",
